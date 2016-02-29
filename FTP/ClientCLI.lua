@@ -2,7 +2,7 @@
 	Client CLI
 ]]--
 
-local path = ...
+local path, path2 = ...
 
 dofile = function(path,...)
 	local f, err = loadfile(path)
@@ -14,7 +14,7 @@ dofile = function(path,...)
 end
 
 local Delta = dofile(path.."/init.lua", path)
-local FTP = dofile(path.."/Protocols/FTP/Client.lua", Delta)
+local FTP = dofile(path2.."/FTP/Client.lua", Delta)
 
 print("CLI FTP Client by Creator")
 
