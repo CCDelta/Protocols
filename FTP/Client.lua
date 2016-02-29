@@ -1,6 +1,6 @@
 --[[
 	Delta Network FTP Client
-]]--
+]]--f
 
 local Delta = ...
 local AES = Delta.lib.AES
