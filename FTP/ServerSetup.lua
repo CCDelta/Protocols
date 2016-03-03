@@ -3,7 +3,7 @@
 ]]--
 
 local function writeTo(path, data)
-	local file = fs.open(".ftp/"...path,"w")
+	local file = fs.open(".ftp/"..path,"w")
 	file.write(data)
 	file.close()
 end
@@ -33,9 +33,11 @@ term.write("Which side is the modem on: ")
 local side = read()
 writeTo("side",side)
 
-term.write("Which is the request port?")
+term.write("Which is the request port? ")
 local re = read()
-term.write("Which is the authentification port?")
+term.write("Which is the authentification port? ")
 local au = read()
 
 writeTo("ports",re.."\n"..au)
+
+print("Thank you for choosing Delta FTP.")

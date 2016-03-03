@@ -19,7 +19,7 @@ local FTP = dofile(path2.."/FTP/Client.lua", Delta)
 print("CLI FTP Client by Creator")
 
 term.write("Input IP: ")
-local IP = read()
+local IP = read(nil, {"192.168."})
 
 term.write("Input dest port: ")
 local dest_port = tonumber(read())

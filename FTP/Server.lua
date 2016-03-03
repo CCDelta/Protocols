@@ -99,14 +99,34 @@ print("IP: ", modem.connect())
 
 local function setUpConnection(...)
 	local id, IP, dest_port = ...
-	DH(modem, IP, dest_port, connectionPort)
+	local key = SHA(tostring(DH(modem, IP, dest_port, connectionPort)))
+	print(key)
 end
 
 local connections = {}
 
 local actions = {
 	connect = function(ip, client_port, msg)
-		print(ip)
+		print("IP is ",ip)
+		local notFound = true
+		local index = 0
+		while notFound do -- find next free index
+			if not helper[index] then
+				notFound = false
+			else
+				index = index + 1
+			end
+		end
+		helper[index] = os.clock()+30
+		print("Index is ", index)
+		modem.send(ip, client_port, connectionPort, {
+			[1] = "connection_port"
+		})
+		print("Sent message.",index)
+		process[index] = 
+		Thread.new(
+			setUpConnection, index, ip, client_port)
+		print("Added function.")
 	end
 }
 
@@ -148,8 +168,9 @@ local function main()
 end
 
 local function clean()
+	local time = os.clock()
 	for i,v in pairs(helper) do
-		if v == "done" and type(i) == "number" then
+		if type(i) == "number" and v < time then
 			processes[i] = nil
 		end
 	end
@@ -158,10 +179,6 @@ end
 print("Loaded more stuff")
 
 processes.main = Thread.new(main)
-
-for i,v in pairs(processes) do
-	print("wow",i)
-end
 
 Thread.run(processes, clean)
 
