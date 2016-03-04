@@ -34,8 +34,8 @@ local FTP = function(modem, ip, dest_port, send_port)
 		server_connection_port = packet[4]
 		print(server_connection_port)
 		key = SHA(tostring(DH(modem, ip, server_connection_port, send_port)))
-		enc_pass = AES.encryptBytes(key, pass)
 		print(key)
+		enc_pass = AES.encryptBytes(key, pass)
 	end
 
 	self.list = function(path)
