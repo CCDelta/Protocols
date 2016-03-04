@@ -27,15 +27,15 @@ local FTP = function(modem, ip, dest_port, send_port)
 		local packet
 		repeat
 			packet = modem.receive()
-			print("Got packet")
-			print(packet[5])
 		until packet and packet[5][1] == "connection_port" and packet[2] == ip
 		print("Packet accepted.")
 		server_connection_port = packet[4]
-		print(server_connection_port)
 		key = SHA(tostring(DH(modem, ip, server_connection_port, send_port)))
-		print(key)
 		enc_pass = AES.encryptBytes(key, pass)
+		self.sendCommand({
+			[1] = user,
+			[2] = enc_pass,
+		})
 	end
 
 	self.list = function(path)

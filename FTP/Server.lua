@@ -17,6 +17,7 @@ local Delta = dofile(path.."/init.lua", path)
 local Thread = Delta.lib.Thread
 local DH = Delta.lib.DH
 local SHA = Delta.lib.SHA256
+local AES = Delta.lib.AES
 local helper = {}
 local processes = {}
 local side, port, connectionPort
@@ -101,7 +102,16 @@ print("IP: ", modem.connect(5))
 local function setUpConnection(...)
 	local id, IP, dest_port = ...
 	local key = SHA(tostring(DH(modem, IP, dest_port, connectionPort)))
-	print(key)
+	local packet
+	repeat
+		packet = modem.receive(true)
+	until packet and type(packet) == "table" and packet[1] == modem.IP and packet[2] == IP and packet[3] == port
+		and packet[4] == dest_port
+	print("Yeah")
+	local decrypted_pass = AES.decryptBytes(key,packet[5][2])
+	os.queueEvent("FTP_Server_Event")
+	os.pullEventRaw("FTP_Server_Event")
+	print(decrypted_pass)
 end
 
 local connections = {}

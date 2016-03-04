@@ -41,6 +41,10 @@ modem.connect()
 
 local connection = FTP(modem, IP, dest_port, send_port)
 
+term.write("Input username: ")
+local user = read()
 
+term.write("Input password: ")
+local pass = read()
 
-connection.connect()
+connection.connect(user, pass)
