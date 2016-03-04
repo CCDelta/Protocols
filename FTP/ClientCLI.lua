@@ -28,7 +28,14 @@ term.write("Input send port: ")
 local send_port = tonumber(read())
 
 term.write("Input modem side: ")
-local side = read()
+local side = read(nil, {
+	"right",
+	"left",
+	"back",
+	"front",
+	"top",
+	"bottom"
+})
 local modem = Delta.modem(side)
 modem.connect()
 

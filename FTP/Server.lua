@@ -16,6 +16,7 @@ end
 local Delta = dofile(path.."/init.lua", path)
 local Thread = Delta.lib.Thread
 local DH = Delta.lib.DH
+local SHA = Delta.lib.SHA256
 local helper = {}
 local processes = {}
 local side, port, connectionPort
@@ -95,7 +96,7 @@ loadSettings()
 
 print("Getting modem")
 local modem = Delta.modem(side)
-print("IP: ", modem.connect())
+print("IP: ", modem.connect(5))
 
 local function setUpConnection(...)
 	local id, IP, dest_port = ...
@@ -123,7 +124,7 @@ local actions = {
 			[1] = "connection_port"
 		})
 		print("Sent message.",index)
-		process[index] = 
+		processes[index] = 
 		Thread.new(
 			setUpConnection, index, ip, client_port)
 		print("Added function.")
@@ -146,7 +147,6 @@ local function main()
 	local action, user, pass, arguments
 	while true do
 		event, dummy = modem.receive(true)
-		print("Main: got event")
 		--[[if event then
 			print(event[1])
 			print(event[2])
