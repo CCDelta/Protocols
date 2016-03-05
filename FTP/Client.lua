@@ -12,7 +12,7 @@ local FTP = function(modem, ip, dest_port, send_port)
 	assert(type(ip) == "string", "Please pass an IP!")
 	assert(type(dest_port) == "number", "Please pass a dest_port!")
 	assert(type(send_port) == "number", "Please pass a send_port!")
-	local key, enc_pass, user, server_connection_port
+	local key, enc_pass, user, server_connection_port, enc_user
 
 	local self = {}
 
@@ -32,8 +32,9 @@ local FTP = function(modem, ip, dest_port, send_port)
 		server_connection_port = packet[4]
 		key = SHA(tostring(DH(modem, ip, server_connection_port, send_port)))
 		enc_pass = AES.encryptBytes(key, pass)
+		enc_user = AES.encryptBytes(key, user)
 		self.sendCommand({
-			[1] = user,
+			[1] = enc_user,
 			[2] = enc_pass,
 		})
 	end

@@ -107,14 +107,26 @@ loadSettings()
 
 local function loadUsers()
 	if fs.exists(".ftp/users") then
+		local index, permission, pass
 		local file = fs.open(".ftp/users","r")
 		local data = file.readAll()
 		file.close()
-
+		for token in data:gmatch("[^\n]+") do
+			index, permission, pass = nil, nil, nil
+			index, permission, pass = token:match("([^:]+):([^:]+):([^:]+)")
+			if not users[index] then
+				users[index] = {
+					[1] = pass,
+					[2] = permission
+				}
+			end
+		end
 	else
 		error("No user file found.")
 	end
 end
+
+loadUsers()
 
 print("Getting modem")
 local modem = Delta.modem(side)
@@ -129,15 +141,22 @@ local function setUpConnection(...)
 	until packet and type(packet) == "table" and packet[1] == modem.IP and packet[2] == IP and packet[3] == port
 		and packet[4] == dest_port
 	local decrypted_pass = AES.decryptBytes(key,packet[5][2])
+	local decrypted_user = AES.decryptBytes(key,packet[5][1])
 	local sha_pass = SHA(decrypted_pass)
-	connections[IP..":"..tostring(dest_port)] = {
-		[1] = packet[5][1]
-		[2] = packet[5][1]
-	}
+	if users[decrypted_user] and users[decrypted_user][1] == sha_pass then
+		connections[IP] = {
+			dest_port = {
+				[1] = decrypted_user,
+				[2] = sha_pass
+			}
+		}
+		print("Sucess")
+	else
+		print("Fail")
+	end
 	os.queueEvent("FTP_Server_Event")
-	print("FTP_Server_Event")
 	os.pullEventRaw("FTP_Server_Event")
-	print(decrypted_pass)
+	helper[id] = "done"
 end
 
 local actions = {
@@ -195,6 +214,7 @@ local function main()
 				print("Does exist")
 				actions[action](event[2], event[4], event[5])
 			else
+				print(action)
 				print("No such action")
 			end
 		end
@@ -203,9 +223,10 @@ end
 
 local function clean()
 	local time = os.clock()
-	for i,v in pairs(helper) do
-		if type(i) == "number" and v < time then
+	for i, v in pairs(helper) do
+		if (type(i) == "number" and type(v) == "number"and v < time) or i == "done" then
 			processes[i] = nil
+			print("Niled index ", v)
 		end
 	end
 end
