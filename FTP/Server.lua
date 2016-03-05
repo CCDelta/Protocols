@@ -20,6 +20,16 @@ local SHA = Delta.lib.SHA256
 local AES = Delta.lib.AES
 local helper = {}
 local processes = {}
+local connections = {}
+local users = {}
+--[[
+users = {
+	name = {
+		[1] = pass_sha
+		[2] = permission
+	}
+}
+]]
 local side, port, connectionPort
 
 local permissions = {
@@ -95,6 +105,17 @@ end
 
 loadSettings()
 
+local function loadUsers()
+	if fs.exists(".ftp/users") then
+		local file = fs.open(".ftp/users","r")
+		local data = file.readAll()
+		file.close()
+
+	else
+		error("No user file found.")
+	end
+end
+
 print("Getting modem")
 local modem = Delta.modem(side)
 print("IP: ", modem.connect(5))
@@ -107,14 +128,17 @@ local function setUpConnection(...)
 		packet = modem.receive(true)
 	until packet and type(packet) == "table" and packet[1] == modem.IP and packet[2] == IP and packet[3] == port
 		and packet[4] == dest_port
-	print("Yeah")
 	local decrypted_pass = AES.decryptBytes(key,packet[5][2])
+	local sha_pass = SHA(decrypted_pass)
+	connections[IP..":"..tostring(dest_port)] = {
+		[1] = packet[5][1]
+		[2] = packet[5][1]
+	}
 	os.queueEvent("FTP_Server_Event")
+	print("FTP_Server_Event")
 	os.pullEventRaw("FTP_Server_Event")
 	print(decrypted_pass)
 end
-
-local connections = {}
 
 local actions = {
 	connect = function(ip, client_port, msg)
